@@ -1,6 +1,6 @@
 # Instagram Downloader
 
-![JavaScript](https://img.shields.io/badge/html-yellow)
+![JavaScript](https://img.shields.io/badge/HTML-yellow)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 Instagram downloader website for downloading reels, videos, photos, and carousel posts.
