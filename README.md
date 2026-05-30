@@ -10,7 +10,7 @@ Instagram downloader website for downloading reels, videos, photos, and carousel
 - Reels Downloader
 - Video Downloader
 - Photo Downloader
-- 
+
 ## Usage
 
 Paste an Instagram URL and click **Download**.
