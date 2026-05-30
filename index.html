@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram Downloader</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Poppins', sans-serif;
+	min-height: 100vh;
+	width: 100%;
+	--grid-color: #1a1a1a;
+	background-color: #0a0a0a;
+	background-image:
+		linear-gradient(0deg, transparent 24%, var(--grid-color) 25%, var(--grid-color) 26%, transparent 27%, transparent 74%, var(--grid-color) 75%, var(--grid-color) 76%, transparent 77%, transparent),
+		linear-gradient(90deg, transparent 24%, var(--grid-color) 25%, var(--grid-color) 26%, transparent 27%, transparent 74%, var(--grid-color) 75%, var(--grid-color) 76%, transparent 77%, transparent);
+	background-size: 55px 55px;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	padding: 48px 20px 60px;
+}
+
+.ig-inner {
+	width: 100%;
+	max-width: 620px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 32px;
+}
+
+.ig-logo {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+}
+
+.ig-icon {
+	width: 58px;
+	height: 58px;
+	border-radius: 16px;
+	background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.ig-icon svg {
+	width: 30px;
+	height: 30px;
+	fill: none;
+	stroke: white;
+	stroke-width: 1.8px;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.ig-title {
+	font-size: 28px;
+	font-weight: 700;
+	color: #fff;
+	letter-spacing: -0.5px;
+}
+
+.ig-subtitle {
+	font-size: 13px;
+	color: #444;
+	margin-top: -6px;
+}
+
+.ig-card {
+	width: 100%;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 20px;
+	padding: 24px;
+}
+
+.ig-input-row {
+	display: flex;
+	gap: 10px;
+}
+
+.ig-input {
+	flex: 1;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 12px;
+	padding: 14px 18px;
+	color: #fff;
+	font-family: 'Poppins', sans-serif;
+	font-size: 14px;
+	outline: none;
+	transition: border-color 0.2s, background 0.2s;
+}
+
+.ig-input::placeholder {
+	color: #444;
+}
+
+.ig-input:focus {
+	border-color: rgba(220, 39, 67, 0.6);
+	background: rgba(255, 255, 255, 0.09);
+}
+
+.ig-btn {
+	background: linear-gradient(135deg, #f09433, #dc2743, #bc1888);
+	border: none;
+	border-radius: 12px;
+	padding: 14px 22px;
+	color: white;
+	font-family: 'Poppins', sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	transition: opacity 0.15s, transform 0.15s;
+	white-space: nowrap;
+}
+
+.ig-btn:hover:not(:disabled) {
+	opacity: 0.88;
+	transform: translateY(-1px);
+}
+
+.ig-btn:active:not(:disabled) {
+	transform: scale(0.97);
+}
+
+.ig-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.ig-status {
+	display: none;
+	align-items: center;
+	gap: 10px;
+	padding: 14px 18px;
+	border-radius: 12px;
+	font-size: 13px;
+	font-weight: 500;
+	margin-top: 14px;
+}
+
+.ig-status.loading {
+	display: flex;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	color: #888;
+}
+
+.ig-status.error {
+	display: flex;
+	background: rgba(220, 39, 67, 0.1);
+	border: 1px solid rgba(220, 39, 67, 0.2);
+	color: #f87a8e;
+}
+
+.spinner {
+	width: 16px;
+	height: 16px;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+	border-top-color: #dc2743;
+	border-radius: 50%;
+	animation: spin 0.7s linear infinite;
+	flex-shrink: 0;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.ig-result {
+	display: none;
+	width: 100%;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 20px;
+	overflow: hidden;
+}
+
+.ig-preview-wrap {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 4/3;
+	overflow: hidden;
+	background: #111;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.ig-preview-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	filter: blur(20px) brightness(0.35) saturate(1.5);
+	transform: scale(1.1);
+	z-index: 0;
+}
+
+.ig-preview-fg {
+	position: relative;
+	z-index: 1;
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+.ig-preview-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.82) 100%);
+	pointer-events: none;
+}
+
+.ig-overlay-info {
+	position: absolute;
+	bottom: 16px;
+	left: 20px;
+	right: 20px;
+	z-index: 3;
+}
+
+.ig-vtitle {
+	font-size: 14px;
+	font-weight: 600;
+	color: #fff;
+	margin-bottom: 4px;
+	line-height: 1.4;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+.ig-vauthor {
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.ig-type-pill {
+	position: absolute;
+	top: 12px;
+	left: 14px;
+	z-index: 4;
+	font-size: 11px;
+	font-weight: 700;
+	padding: 3px 10px;
+	border-radius: 20px;
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+}
+
+.pill-photo {
+	background: rgba(30, 200, 100, 0.18);
+	color: #4edd8a;
+	border: 1px solid rgba(78, 221, 138, 0.35);
+}
+
+.pill-video {
+	background: rgba(80, 120, 255, 0.18);
+	color: #7fa6ff;
+	border: 1px solid rgba(127, 166, 255, 0.35);
+}
+
+.pill-carousel {
+	background: rgba(255, 180, 30, 0.18);
+	color: #ffc84a;
+	border: 1px solid rgba(255, 200, 74, 0.35);
+}
+
+.ig-play-btn {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 4;
+	width: 58px;
+	height: 58px;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.6);
+	border: 2px solid rgba(255, 255, 255, 0.25);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 24px;
+	pointer-events: none;
+}
+
+.ig-preview-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	color: #2a2a2a;
+	z-index: 1;
+}
+
+.ig-preview-placeholder i {
+	font-size: 40px;
+}
+
+.ig-preview-placeholder span {
+	font-size: 13px;
+}
+
+.ig-slideshow {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 4/3;
+	overflow: hidden;
+	background: #111;
+}
+
+.ig-slides {
+	display: flex;
+	height: 100%;
+	transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ig-slide {
+	min-width: 100%;
+	height: 100%;
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #111;
+}
+
+.ig-slide .ig-preview-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.ig-slide .ig-preview-fg {
+	position: relative;
+	z-index: 1;
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.ig-slide .ig-preview-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+	pointer-events: none;
+}
+
+.ig-slide .ig-play-btn {
+	z-index: 3;
+}
+
+.ig-slide .ig-type-pill {
+	z-index: 4;
+}
+
+.ig-slide-nav {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	background: rgba(0, 0, 0, 0.5);
+	border: none;
+	color: #fff;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 20px;
+	transition: background 0.2s;
+	z-index: 10;
+}
+
+.ig-slide-nav:hover {
+	background: rgba(220, 39, 67, 0.7);
+}
+
+.ig-slide-nav.prev {
+	left: 12px;
+}
+
+.ig-slide-nav.next {
+	right: 12px;
+}
+
+.ig-slide-nav:disabled {
+	opacity: 0.2;
+	cursor: default;
+}
+
+.ig-counter {
+	position: absolute;
+	top: 12px;
+	right: 14px;
+	z-index: 10;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 3px 9px;
+	border-radius: 20px;
+	letter-spacing: 0.4px;
+}
+
+.ig-dots {
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+	padding: 10px 0 4px;
+}
+
+.ig-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.2);
+	transition: background 0.2s, transform 0.2s;
+	cursor: pointer;
+	border: none;
+}
+
+.ig-dot.active {
+	background: #dc2743;
+	transform: scale(1.3);
+}
+
+.ig-result-body {
+	padding: 20px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.ig-owner {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ig-avatar {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #f09433, #dc2743, #bc1888);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 13px;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.ig-owner-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: #fff;
+}
+
+.ig-owner-handle {
+	font-size: 12px;
+	color: #555;
+}
+
+.ig-caption {
+	font-size: 13px;
+	color: #777;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	word-break: break-word;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	cursor: pointer;
+	transition: color 0.15s;
+}
+
+.ig-caption.expanded {
+	-webkit-line-clamp: unset;
+	overflow: visible;
+}
+
+.ig-caption:hover {
+	color: #aaa;
+}
+
+.ig-dl-row {
+	display: flex;
+	gap: 10px;
+}
+
+.ig-dl-btn {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 13px;
+	border-radius: 12px;
+	font-family: 'Poppins', sans-serif;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: transform 0.15s, opacity 0.15s;
+	border: none;
+	position: relative;
+	overflow: hidden;
+}
+
+.ig-dl-btn:hover:not(:disabled) {
+	opacity: 0.88;
+	transform: translateY(-1px);
+}
+
+.ig-dl-btn:active:not(:disabled) {
+	transform: scale(0.97);
+}
+
+.ig-dl-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.ig-dl-primary {
+	background: linear-gradient(135deg, #f09433, #dc2743, #bc1888);
+	color: white;
+}
+
+.ig-dl-secondary {
+	background: rgba(255, 255, 255, 0.07);
+	color: rgba(255, 255, 255, 0.7);
+	border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dl-progress {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	height: 3px;
+	background: rgba(255, 255, 255, 0.4);
+	width: 0%;
+	transition: width 0.2s;
+}
+
+.ig-footer {
+	font-size: 12px;
+	color: #2a2a2a;
+	letter-spacing: 0.3px;
+}
+
+.ig-footer span {
+	background: linear-gradient(90deg, #f09433, #bc1888);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	font-weight: 600;
+}
+
+@media (max-width: 480px) {
+	body {
+		padding: 32px 14px 48px;
+	}
+
+	.ig-title {
+		font-size: 22px;
+	}
+
+	.ig-input-row {
+		flex-direction: column;
+	}
+
+	.ig-btn {
+		justify-content: center;
+	}
+
+	.ig-dl-row {
+		flex-direction: column;
+	}
+}
+</style>
+</head>
+<body>
+<div class="ig-inner">
+
+  <div class="ig-logo">
+    <div class="ig-icon">
+      <svg viewBox="0 0 24 24">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+        <circle cx="12" cy="12" r="4"/>
+        <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+      </svg>
+    </div>
+    <div class="ig-title">Instagram Downloader</div>
+    <div class="ig-subtitle">Download Instagram posts and reels.</div>
+  </div>
+
+  <div class="ig-card">
+    <div class="ig-input-row">
+      <input class="ig-input" id="ig-url" type="text" placeholder="Paste Instagram link here…" autocomplete="off"/>
+      <button class="ig-btn" id="ig-fetchbtn" onclick="igFetch()">
+        <i class="ti ti-download"></i> Fetch
+      </button>
+    </div>
+    <div class="ig-status" id="ig-status">
+      <div class="spinner" id="ig-spinner"></div>
+      <span id="ig-status-text">Fetching…</span>
+    </div>
+  </div>
+
+  <div class="ig-result" id="ig-result">
+
+    <div id="ig-single-view">
+      <div class="ig-preview-wrap" id="ig-preview-wrap">
+        <span class="ig-type-pill" id="ig-type-pill"></span>
+        <img class="ig-preview-bg" id="ig-preview-bg" src="" alt=""/>
+        <img class="ig-preview-fg" id="ig-preview-fg" src="" alt="Preview"/>
+        <div class="ig-preview-overlay"></div>
+        <div class="ig-overlay-info">
+          <div class="ig-vtitle"  id="ig-vtitle"></div>
+          <div class="ig-vauthor" id="ig-vauthor"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="ig-carousel-view" style="display:none;">
+      <div class="ig-slideshow">
+        <div class="ig-slides" id="ig-slides"></div>
+        <button class="ig-slide-nav prev" id="ig-prev" onclick="slideNav(-1)">&#8249;</button>
+        <button class="ig-slide-nav next" id="ig-next" onclick="slideNav(1)">&#8250;</button>
+        <div class="ig-counter" id="ig-counter">1 / 1</div>
+      </div>
+      <div class="ig-dots" id="ig-dots"></div>
+    </div>
+
+    <div class="ig-result-body">
+      <div class="ig-owner" id="ig-owner-row" style="display:none;">
+        <div class="ig-avatar" id="ig-avatar">IG</div>
+        <div>
+          <div class="ig-owner-name"   id="ig-owner-name"></div>
+          <div class="ig-owner-handle" id="ig-owner-handle"></div>
+        </div>
+      </div>
+      <div class="ig-caption" id="ig-caption" onclick="toggleCaption()" style="display:none;"></div>
+      <div class="ig-dl-row" id="ig-single-btns">
+        <button class="ig-dl-btn ig-dl-primary" id="ig-dl-main" onclick="startDownload(0)">
+          <i class="ti ti-download" id="ig-dl-main-icon"></i>
+          <span id="ig-dl-main-label">Download</span>
+          <div class="dl-progress" id="ig-dl-main-progress"></div>
+        </button>
+      </div>
+      <div class="ig-dl-row" id="ig-carousel-btns" style="display:none;">
+        <button class="ig-dl-btn ig-dl-primary" id="ig-dl-cur" onclick="downloadCurrent()">
+          <i class="ti ti-photo" id="ig-dl-cur-icon"></i>
+          <span id="ig-dl-cur-label">Download This</span>
+          <div class="dl-progress" id="ig-dl-cur-progress"></div>
+        </button>
+        <button class="ig-dl-btn ig-dl-secondary" id="ig-dl-all" onclick="downloadAll()">
+          <i class="ti ti-packages" id="ig-dl-all-icon"></i>
+          <span id="ig-dl-all-label">Download All</span>
+          <div class="dl-progress" id="ig-dl-all-progress"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ig-footer">Made with <span>RetrivedMods</span></div>
+</div>
+
+<script>
+const API = 'https://instagram-downloader-api-omega.vercel.app/api/download';
+
+function proxyImg(rawUrl) {
+  if (!rawUrl) return '';
+  if (/rapidcdn\.app|snapsave/.test(rawUrl)) return rawUrl;
+  return 'https://wsrv.nl/?url=' + encodeURIComponent(rawUrl) + '&n=-1&we';
+}
+
+function proxyImgB(rawUrl) {
+  if (!rawUrl) return '';
+  return 'https://images.weserv.nl/?url=' + encodeURIComponent(rawUrl);
+}
+
+function loadImg(imgEl, rawUrl, onSuccess) {
+  if (!rawUrl) { placeholder(imgEl); return; }
+  const chain = [proxyImg(rawUrl), proxyImgB(rawUrl), rawUrl];
+  let i = 0;
+  function next() {
+    if (i >= chain.length) { placeholder(imgEl); return; }
+    imgEl.onerror = () => { i++; next(); };
+    imgEl.onload  = () => { if (onSuccess) onSuccess(imgEl.src); };
+    imgEl.src = chain[i++];
+  }
+  next();
+}
+
+function placeholder(imgEl) {
+  imgEl.style.display = 'none';
+  const wrap = imgEl.closest('.ig-preview-wrap, .ig-slide');
+  if (!wrap || wrap.querySelector('.ig-preview-placeholder')) return;
+  const ph = document.createElement('div');
+  ph.className = 'ig-preview-placeholder';
+  ph.innerHTML = '<i class="ti ti-photo-off"></i><span>Preview unavailable</span>';
+  wrap.appendChild(ph);
+}
+
+let mediaItems = [], slideIndex = 0;
+function G(id) { return document.getElementById(id); }
+
+async function igFetch() {
+  const url = G('ig-url').value.trim();
+  G('ig-status').className = 'ig-status';
+  G('ig-result').style.display = 'none';
+  if (!url)                        { showError('Please paste an Instagram URL first.'); return; }
+  if (!/instagram\.com/.test(url)) { showError('Please enter a valid Instagram URL.'); return; }
+  G('ig-status').className = 'ig-status loading';
+  G('ig-fetchbtn').disabled = true;
+  G('ig-status-text').textContent = 'Fetching media…';
+  try {
+    const json = await fetch(API + '?url=' + encodeURIComponent(url)).then(r => r.json());
+    G('ig-status').className = 'ig-status';
+    G('ig-fetchbtn').disabled = false;
+    if (!json.success || !json.data) { showError(json.error || 'Could not fetch. Post may be private.'); return; }
+    render(json.data, json.type);
+  } catch(e) {
+    G('ig-status').className = 'ig-status'; G('ig-fetchbtn').disabled = false;
+    showError('Network error. Please try again.');
+  }
+}
+
+function render(data, type) {
+  mediaItems = data.media || []; slideIndex = 0;
+  const caption = (data.caption || '').trim();
+  const owner   = data.owner || {};
+
+  if (owner.username || owner.full_name) {
+    const name = owner.full_name || owner.username || 'Instagram';
+    G('ig-avatar').textContent      = name.slice(0,2).toUpperCase();
+    G('ig-owner-name').textContent   = name;
+    G('ig-owner-handle').textContent = owner.username ? '@' + owner.username : '';
+    G('ig-owner-row').style.display  = 'flex';
+  } else { G('ig-owner-row').style.display = 'none'; }
+
+  if (caption) {
+    G('ig-caption').textContent = caption;
+    G('ig-caption').style.display = 'block';
+    G('ig-caption').classList.remove('expanded');
+  } else { G('ig-caption').style.display = 'none'; }
+
+  if (type === 'carousel' && mediaItems.length > 1) renderCarousel(data);
+  else renderSingle(data);
+  G('ig-result').style.display = 'block';
+}
+
+function renderSingle(data) {
+  G('ig-single-view').style.display   = 'block';
+  G('ig-carousel-view').style.display = 'none';
+  G('ig-single-btns').style.display   = 'flex';
+  G('ig-carousel-btns').style.display = 'none';
+
+  const item   = mediaItems[0] || {};
+  const rtype  = resolveType(item);
+  const rawUrl = item.thumbnail || item.url || '';
+
+  G('ig-type-pill').textContent = rtype;
+  G('ig-type-pill').className   = 'ig-type-pill pill-' + rtype;
+
+  const wrap = G('ig-preview-wrap');
+  const bg   = G('ig-preview-bg');
+  const fg   = G('ig-preview-fg');
+
+  const oldPh = wrap.querySelector('.ig-preview-placeholder');
+  if (oldPh) oldPh.remove();
+  bg.style.display = fg.style.display = 'block';
+  bg.src = fg.src = '';
+
+  loadImg(fg, rawUrl, (loadedSrc) => { bg.src = loadedSrc; });
+
+  let pi = wrap.querySelector('.ig-play-btn');
+  if (rtype === 'video') {
+    if (!pi) {
+      pi = document.createElement('div');
+      pi.className = 'ig-play-btn';
+      pi.innerHTML = '<i class="ti ti-player-play-filled"></i>';
+      wrap.appendChild(pi);
+    }
+    pi.style.display = 'flex';
+  } else if (pi) { pi.style.display = 'none'; }
+
+  G('ig-vtitle').textContent  = data.caption ? data.caption.slice(0,80) + (data.caption.length > 80 ? '…' : '') : '';
+  G('ig-vauthor').textContent = data.owner && data.owner.username ? '@' + data.owner.username : '';
+  G('ig-dl-main-label').textContent = rtype === 'video' ? 'Download Video' : 'Download Photo';
+  G('ig-dl-main-icon').className    = rtype === 'video' ? 'ti ti-video' : 'ti ti-photo';
+  resetSingleBtn();
+}
+
+function renderCarousel(data) {
+  G('ig-single-view').style.display   = 'none';
+  G('ig-carousel-view').style.display = 'block';
+  G('ig-single-btns').style.display   = 'none';
+  G('ig-carousel-btns').style.display = 'flex';
+
+  const slidesEl = G('ig-slides'); slidesEl.innerHTML = '';
+  const dotsEl   = G('ig-dots');   dotsEl.innerHTML   = '';
+
+  mediaItems.forEach((item, i) => {
+    const rtype  = resolveType(item);
+    const rawUrl = item.thumbnail || item.url || '';
+
+    const slide = document.createElement('div'); slide.className = 'ig-slide';
+
+    const bg = document.createElement('img'); bg.className = 'ig-preview-bg'; bg.alt = '';
+    const fg = document.createElement('img'); fg.className = 'ig-preview-fg'; fg.alt = 'Item ' + (i+1); fg.loading = 'lazy';
+    const ov = document.createElement('div'); ov.className = 'ig-preview-overlay';
+
+    slide.appendChild(bg); slide.appendChild(fg); slide.appendChild(ov);
+
+    if (rtype === 'video') {
+      const pi = document.createElement('div'); pi.className = 'ig-play-btn';
+      pi.innerHTML = '<i class="ti ti-player-play-filled"></i>';
+      slide.appendChild(pi);
+    }
+
+    const pill = document.createElement('span');
+    pill.className = 'ig-type-pill pill-' + rtype; pill.textContent = rtype;
+    slide.appendChild(pill);
+
+    loadImg(fg, rawUrl, (src) => { bg.src = src; });
+
+    slidesEl.appendChild(slide);
+
+    const dot = document.createElement('button');
+    dot.className = 'ig-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goToSlide(i);
+    dotsEl.appendChild(dot);
+  });
+
+  updateSlideUI(); resetCarouselBtns();
+}
+
+function slideNav(dir) { goToSlide(slideIndex + dir); }
+function goToSlide(idx) {
+  if (idx < 0 || idx >= mediaItems.length) return;
+  slideIndex = idx;
+  G('ig-slides').style.transform = 'translateX(-' + (slideIndex * 100) + '%)';
+  updateSlideUI(); resetCarouselBtns();
+}
+function updateSlideUI() {
+  G('ig-counter').textContent = (slideIndex + 1) + ' / ' + mediaItems.length;
+  G('ig-prev').disabled = slideIndex === 0;
+  G('ig-next').disabled = slideIndex === mediaItems.length - 1;
+  document.querySelectorAll('.ig-dot').forEach((d, i) => d.classList.toggle('active', i === slideIndex));
+}
+
+function resolveType(item) {
+  const url = item.url || '';
+  if (/\.mp4([?#]|$)/i.test(url)) return 'video';
+  try {
+    const u = new URL(url);
+    const efg = u.searchParams.get('efg');
+    if (efg) { try { if (/video/i.test(atob(efg))) return 'video'; } catch {} }
+    if (/\/v\/t(?:7x|50|64|66)\./i.test(u.pathname)) return 'video';
+    if (/\/v\/t51\./i.test(u.pathname))               return 'photo';
+  } catch {}
+  if (item.thumbnail && item.url && item.thumbnail === item.url) return 'photo';
+  if (item.thumbnail && item.url && item.thumbnail !== item.url && !/\.(jpg|jpeg|png|webp)([?#]|$)/i.test(url)) return 'video';
+  return item.type === 'video' ? 'video' : 'photo';
+}
+
+async function startDownload(idx) {
+  const item = mediaItems[idx]; if (!item) return;
+  const btn = G('ig-dl-main'), icon = G('ig-dl-main-icon'), lbl = G('ig-dl-main-label'), prog = G('ig-dl-main-progress');
+  const ext = resolveType(item) === 'video' ? 'mp4' : 'jpg';
+  btn.disabled = true; icon.className = 'ti ti-loader-2'; icon.style.animation = 'spin 0.7s linear infinite'; lbl.textContent = 'Downloading…';
+  const ok = await dlFile(item.proxy_url || item.url, 'instagram-media.' + ext, prog);
+  icon.style.animation = '';
+  if (ok) { icon.className = 'ti ti-check'; lbl.textContent = 'Downloaded!'; setTimeout(resetSingleBtn, 3000); }
+  else    { icon.className = 'ti ti-alert-triangle'; lbl.textContent = 'Failed — Retry'; btn.disabled = false; }
+}
+
+async function downloadCurrent() {
+  const item = mediaItems[slideIndex]; if (!item) return;
+  const btn = G('ig-dl-cur'), icon = G('ig-dl-cur-icon'), lbl = G('ig-dl-cur-label'), prog = G('ig-dl-cur-progress');
+  const ext = resolveType(item) === 'video' ? 'mp4' : 'jpg';
+  btn.disabled = true; icon.className = 'ti ti-loader-2'; icon.style.animation = 'spin 0.7s linear infinite'; lbl.textContent = 'Downloading…';
+  const ok = await dlFile(item.proxy_url || item.url, 'instagram-' + (slideIndex+1) + '.' + ext, prog);
+  icon.style.animation = '';
+  if (ok) { icon.className = 'ti ti-check'; lbl.textContent = 'Downloaded!'; setTimeout(resetCarouselBtns, 2500); }
+  else    { icon.className = 'ti ti-alert-triangle'; lbl.textContent = 'Failed — Retry'; btn.disabled = false; }
+}
+
+async function downloadAll() {
+  if (!mediaItems.length) return;
+  const btn = G('ig-dl-all'), icon = G('ig-dl-all-icon'), lbl = G('ig-dl-all-label'), prog = G('ig-dl-all-progress');
+  btn.disabled = true; icon.className = 'ti ti-loader-2'; icon.style.animation = 'spin 0.7s linear infinite';
+  let failed = 0;
+  for (let i = 0; i < mediaItems.length; i++) {
+    lbl.textContent = 'Downloading ' + (i+1) + ' / ' + mediaItems.length + '…';
+    prog.style.width = Math.round((i / mediaItems.length) * 100) + '%';
+    const item = mediaItems[i];
+    const ext  = resolveType(item) === 'video' ? 'mp4' : 'jpg';
+    if (!await dlFile(item.proxy_url || item.url, 'instagram-' + (i+1) + '.' + ext, null)) failed++;
+    await new Promise(r => setTimeout(r, 400));
+  }
+  prog.style.width = '100%'; icon.style.animation = '';
+  if (!failed) { icon.className = 'ti ti-check'; lbl.textContent = 'All Downloaded!'; }
+  else         { icon.className = 'ti ti-alert-triangle'; lbl.textContent = failed + ' failed — Retry'; btn.disabled = false; }
+  setTimeout(resetCarouselBtns, 3000);
+}
+
+async function dlFile(url, filename, prog) {
+  try {
+    const resp = await fetch(url, { mode: 'cors' });
+    if (!resp.ok) throw 0;
+    const cl = resp.headers.get('Content-Length');
+    const total = cl ? parseInt(cl) : 0;
+    const reader = resp.body.getReader(); const chunks = []; let rx = 0;
+    while (true) {
+      const { done, value } = await reader.read(); if (done) break;
+      chunks.push(value); rx += value.length;
+      if (prog) prog.style.width = (total > 0 ? Math.min(100, Math.round(rx/total*100)) : 60) + '%';
+    }
+    if (prog) prog.style.width = '100%';
+    const bu = URL.createObjectURL(new Blob(chunks));
+    anchor(bu, filename); setTimeout(() => URL.revokeObjectURL(bu), 15000); return true;
+  } catch { try { anchor(url, filename); return true; } catch { return false; } }
+}
+
+function anchor(href, fn) {
+  const a = document.createElement('a'); a.href = href; a.download = fn; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function resetSingleBtn() {
+  const rtype = resolveType(mediaItems[0] || {});
+  G('ig-dl-main').disabled = false;
+  G('ig-dl-main-icon').className = rtype === 'video' ? 'ti ti-video' : 'ti ti-photo';
+  G('ig-dl-main-icon').style.animation = '';
+  G('ig-dl-main-label').textContent = rtype === 'video' ? 'Download Video' : 'Download Photo';
+  G('ig-dl-main-progress').style.width = '0%';
+}
+
+function resetCarouselBtns() {
+  const rtype = resolveType(mediaItems[slideIndex] || {});
+  G('ig-dl-cur').disabled = G('ig-dl-all').disabled = false;
+  G('ig-dl-cur-icon').className = rtype === 'video' ? 'ti ti-video' : 'ti ti-photo';
+  G('ig-dl-cur-icon').style.animation = '';
+  G('ig-dl-cur-label').textContent = rtype === 'video' ? 'Download Video' : 'Download Photo';
+  G('ig-dl-cur-progress').style.width = '0%';
+  G('ig-dl-all-icon').className = 'ti ti-packages'; G('ig-dl-all-icon').style.animation = '';
+  G('ig-dl-all-label').textContent = 'Download All'; G('ig-dl-all-progress').style.width = '0%';
+}
+
+function toggleCaption() { G('ig-caption').classList.toggle('expanded'); }
+
+function showError(msg) {
+  G('ig-spinner').style.display = 'none';
+  G('ig-status-text').textContent = msg;
+  G('ig-status').className = 'ig-status error';
+}
+
+G('ig-url').addEventListener('keydown', e => { if (e.key === 'Enter') igFetch(); });
+</script>
+</body>
+</html>
